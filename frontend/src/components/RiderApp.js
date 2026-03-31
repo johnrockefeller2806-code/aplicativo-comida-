@@ -83,14 +83,14 @@ export default function RiderApp() {
       setNotifications(nRes.data);
       const newCount = cRes.data.count;
 
-      // Play sound and show alert if new notifications arrived
+      // Play sound and show alert if new notifications arrived (only one at a time)
       if (newCount > prevUnreadRef.current && prevUnreadRef.current >= 0) {
         playNotificationSound();
         const latestUnread = nRes.data.find(n => !n.read);
-        if (latestUnread) {
+        if (latestUnread && !newOrderAlert) {
           setNewOrderAlert(latestUnread);
-          // Auto-hide alert after 8 seconds
-          setTimeout(() => setNewOrderAlert(null), 8000);
+          // Auto-hide alert after 10 seconds
+          setTimeout(() => setNewOrderAlert(null), 10000);
         }
       }
       prevUnreadRef.current = newCount;
@@ -283,35 +283,36 @@ export default function RiderApp() {
         </div>
       </nav>
 
-      {/* New Order Alert Banner - Single notification */}
+      {/* New Order Alert Banner - Single notification centered */}
       {newOrderAlert && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-4 px-4 pointer-events-none" data-testid="new-order-alert">
-          <div className="bg-white text-[#1A1D1A] px-5 py-4 shadow-2xl rounded-2xl border border-[#E5E1D8] w-full max-w-sm pointer-events-auto">
+        <div 
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] w-[90%] max-w-sm"
+          data-testid="new-order-alert"
+        >
+          <div className="bg-white text-[#1A1D1A] p-4 shadow-2xl rounded-2xl border-2 border-[#D97746]">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-[#D97746] rounded-full flex items-center justify-center flex-shrink-0">
                 <Volume2 className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-heading font-bold text-sm">{newOrderAlert.title}</p>
+              <div className="flex-1">
+                <p className="font-bold text-sm">{newOrderAlert.title}</p>
                 <p className="text-xs text-[#5C635A] mt-0.5">{newOrderAlert.message}</p>
                 {newOrderAlert.delivery_address && (
                   <p className="text-xs text-[#5C635A] flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3 flex-shrink-0" /> 
-                    <span className="truncate">{newOrderAlert.delivery_address}</span>
+                    <MapPin className="w-3 h-3" /> 
+                    {newOrderAlert.delivery_address}
                   </p>
                 )}
-                <div className="flex items-center gap-2 mt-3">
+                <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => { setNewOrderAlert(null); setActiveTab("deliveries"); }}
-                    className="px-4 py-2 bg-[#D97746] text-white rounded-full font-bold text-xs hover:bg-[#C46838] transition-colors active:scale-95"
-                    data-testid="alert-view-btn"
+                    className="flex-1 py-2 bg-[#D97746] text-white rounded-full font-bold text-xs"
                   >
                     View
                   </button>
                   <button
                     onClick={() => setNewOrderAlert(null)}
-                    className="px-4 py-2 bg-[#F3EFE9] text-[#5C635A] rounded-full font-medium text-xs hover:bg-[#E5E1D8] transition-colors"
-                    data-testid="alert-close-btn"
+                    className="flex-1 py-2 bg-gray-200 text-gray-600 rounded-full font-medium text-xs"
                   >
                     Dismiss
                   </button>
