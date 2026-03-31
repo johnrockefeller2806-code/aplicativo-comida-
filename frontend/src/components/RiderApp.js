@@ -193,9 +193,9 @@ export default function RiderApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]" data-testid="rider-app">
+    <div className="h-screen bg-[#FAF9F6] overflow-hidden flex flex-col" data-testid="rider-app">
       {/* Header */}
-      <nav className="bg-[#8B5E3C] text-white px-6 py-4">
+      <nav className="bg-[#8B5E3C] text-white px-6 py-4 flex-shrink-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bike className="w-6 h-6" />
@@ -354,7 +354,7 @@ export default function RiderApp() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-[#E5E1D8] bg-white sticky top-0 z-40">
+      <div className="border-b border-[#E5E1D8] bg-white flex-shrink-0">
         <div className="max-w-6xl mx-auto px-6 flex gap-1">
           {tabs.map(t => (
             <button
@@ -373,13 +373,13 @@ export default function RiderApp() {
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-6">
+      <main className="flex-1 overflow-hidden">
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
-          <div className="animate-fade-in-up">
+          <div className="h-full p-4">
             {/* Google Maps - Full Screen */}
             {profile?.online && (
-              <div className="rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg" style={{ height: "calc(100vh - 180px)" }}>
+              <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
                 <SimpleGoogleMap height="100%" />
               </div>
             )}
