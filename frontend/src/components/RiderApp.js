@@ -154,21 +154,6 @@ export default function RiderApp() {
     }
   };
 
-  const handleQRScan = async (qrData) => {
-    if (qrProcessing) return;
-    setQrProcessing(true);
-    try {
-      const res = await axios.post(`${API}/rider/validate-qr`, { qr_data: qrData });
-      toast.success(res.data.message);
-      setShowQRScanner(false);
-      fetchData();
-    } catch (err) {
-      toast.error(err.response?.data?.detail || "QR Code inválido");
-    } finally {
-      setQrProcessing(false);
-    }
-  };
-
   const isStudent = profile?.rider_type === "student";
   const hoursUsed = profile?.weekly_hours_used || 0;
   const hoursPercent = Math.min((hoursUsed / 20) * 100, 100);
@@ -577,15 +562,6 @@ export default function RiderApp() {
           </div>
         )}
       </main>
-
-      {/* QR Scanner Modal */}
-      {showQRScanner && (
-        <QRScanner
-          onScan={handleQRScan}
-          onClose={() => setShowQRScanner(false)}
-          isProcessing={qrProcessing}
-        />
-      )}
     </div>
   );
 }
