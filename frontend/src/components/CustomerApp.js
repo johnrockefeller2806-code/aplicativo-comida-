@@ -18,7 +18,7 @@ const NavBar = ({ cartCount, onCartClick, onOrdersClick, activeView, onBack, onL
             <ArrowLeft className="w-5 h-5 text-[#5C635A]" />
           </button>
         )}
-        <img src="/logo.svg" alt="Kangaroos" className="w-9 h-9 object-contain" />
+        <img src="/logo.png" alt="Kangaroos" className="w-9 h-9 object-contain" />
         <span className="font-heading font-bold text-lg text-[#1A1D1A]">Kangaroos</span>
       </div>
       <div className="flex items-center gap-3">
