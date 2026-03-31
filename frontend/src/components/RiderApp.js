@@ -412,15 +412,62 @@ export default function RiderApp() {
             {/* Normal Deliveries View (when not navigating) */}
             {!navigatingOrder && (
               <div className="h-full p-4 overflow-auto">
-                {/* Google Maps - Full Screen (only when no active orders and no available orders) */}
-                {profile?.online && activeOrders.length === 0 && available.length === 0 && (
-                  <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
-                    <SimpleGoogleMap height="100%" />
+                {/* Active Deliveries with Tracker - PRIORITY */}
+                {activeOrders.length > 0 ? (
+                  <div className="max-w-lg mx-auto">
+                    <h2 className="font-heading font-bold text-xl mb-4 flex items-center justify-center gap-2">
+                      <span className="w-3 h-3 bg-green-500 rounded-full pulse-dot" />
+                      Active Deliveries ({activeOrders.length}/3)
+                    </h2>
+                    <div className="space-y-6">
+                      {activeOrders.map(order => (
+                        <div key={order.id} data-testid={`active-delivery-${order.id}`}>
+                          <OrderTracker order={order} variant="rider" />
+                          <div className="mt-3 px-1">
+                            <button
+                              onClick={() => navigateToCustomer(order)}
+                              className="w-full py-3 bg-[#1E3F20] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#163018] transition-all active:scale-95 shadow-md"
+                              data-testid={`navigate-to-customer-${order.id}`}
+                            >
+                              <Navigation className="w-5 h-5" />
+                              Ir ao Cliente
+                            </button>
+                          </div>
+                          <div className="mt-4 bg-white rounded-xl border-2 border-[#1E3F20] p-4 text-center">
+                            <p className="font-bold text-sm mb-3">Mostre este QR para o cliente escanear</p>
+                            <div className="bg-white p-3 rounded-lg inline-block shadow-md">
+                              <QRCodeSVG
+                                value={`KANG-DELIVERY:${order.id}`}
+                                size={150}
+                                level="H"
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-3">
+                              Cliente escaneia → Confirma entrega → Você recebe €{order.rider_amount?.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-
-                {/* Available Orders - Show when there are orders to accept */}
-                {profile?.online && available.length > 0 && (
+                ) : !profile?.online ? (
+                  <div className="text-center py-16 flex flex-col items-center justify-center h-full">
+                    <Power className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
+                    <p className="text-[#5C635A] text-lg mb-4">You're offline</p>
+                    <button
+                      onClick={toggleOnline}
+                      className="px-8 py-3 bg-[#D97746] text-white rounded-full font-bold hover:bg-[#C46838] transition-all active:scale-95"
+                      data-testid="go-online-btn"
+                    >
+                      Go Online
+                    </button>
+                    <img 
+                      src="/logo.png" 
+                      alt="Kangaroos" 
+                      className="mt-12 w-32 h-32 object-contain opacity-70"
+                    />
+                  </div>
+                ) : available.length > 0 ? (
                   <div className="h-full overflow-auto">
                     <div className="max-w-lg mx-auto">
                       <h2 className="font-bold text-xl mb-4 text-center flex items-center justify-center gap-2">
@@ -462,65 +509,9 @@ export default function RiderApp() {
                       </div>
                     </div>
                   </div>
-                )}
-
-                {/* Offline State */}
-                {!profile?.online && (
-                  <div className="text-center py-16 flex flex-col items-center justify-center h-full">
-                    <Power className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
-                    <p className="text-[#5C635A] text-lg mb-4">You're offline</p>
-                    <button
-                      onClick={toggleOnline}
-                      className="px-8 py-3 bg-[#D97746] text-white rounded-full font-bold hover:bg-[#C46838] transition-all active:scale-95"
-                      data-testid="go-online-btn"
-                    >
-                      Go Online
-                    </button>
-                    <img 
-                      src="/logo.png" 
-                      alt="Kangaroos" 
-                      className="mt-12 w-32 h-32 object-contain opacity-70"
-                    />
-                  </div>
-                )}
-
-                {/* Active Deliveries with Tracker */}
-                {activeOrders.length > 0 && (
-                  <div className="max-w-lg mx-auto">
-                    <h2 className="font-heading font-bold text-xl mb-4 flex items-center justify-center gap-2">
-                      <span className="w-3 h-3 bg-green-500 rounded-full pulse-dot" />
-                      Active Deliveries ({activeOrders.length}/3)
-                    </h2>
-                    <div className="space-y-6">
-                      {activeOrders.map(order => (
-                        <div key={order.id} data-testid={`active-delivery-${order.id}`}>
-                          <OrderTracker order={order} variant="rider" />
-                          <div className="mt-3 px-1">
-                            <button
-                              onClick={() => navigateToCustomer(order)}
-                              className="w-full py-3 bg-[#1E3F20] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#163018] transition-all active:scale-95 shadow-md"
-                              data-testid={`navigate-to-customer-${order.id}`}
-                            >
-                              <Navigation className="w-5 h-5" />
-                              Ir ao Cliente
-                            </button>
-                          </div>
-                          <div className="mt-4 bg-white rounded-xl border-2 border-[#1E3F20] p-4 text-center">
-                            <p className="font-bold text-sm mb-3">Mostre este QR para o cliente escanear</p>
-                            <div className="bg-white p-3 rounded-lg inline-block shadow-md">
-                              <QRCodeSVG
-                                value={`KANG-DELIVERY:${order.id}`}
-                                size={150}
-                                level="H"
-                              />
-                            </div>
-                            <p className="text-xs text-gray-500 mt-3">
-                              Cliente escaneia → Confirma entrega → Você recebe €{order.rider_amount?.toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                ) : (
+                  <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
+                    <SimpleGoogleMap height="100%" />
                   </div>
                 )}
               </div>
