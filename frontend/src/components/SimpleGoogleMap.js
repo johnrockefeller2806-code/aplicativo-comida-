@@ -11,16 +11,11 @@ const mapOptions = {
   fullscreenControl: false,
 };
 
-// Rider marker icon
+// Rider marker icon - Using Kangaroos logo
 const createRiderIcon = () => ({
-  url: "data:image/svg+xml," + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-      <circle cx="24" cy="24" r="20" fill="#D97746" stroke="white" stroke-width="4"/>
-      <text x="24" y="30" text-anchor="middle" font-size="20">🛵</text>
-    </svg>
-  `),
-  scaledSize: { width: 48, height: 48 },
-  anchor: { x: 24, y: 24 },
+  url: "/logo.png",
+  scaledSize: { width: 56, height: 56 },
+  anchor: { x: 28, y: 28 },
 });
 
 export default function SimpleGoogleMap({ height = "500px" }) {
