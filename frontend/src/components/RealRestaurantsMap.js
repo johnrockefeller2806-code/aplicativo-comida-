@@ -154,21 +154,7 @@ export default function RealRestaurantsMap({ center, radius = 2000, onSelectRest
   }
 
   return (
-    <div className="rounded-xl overflow-hidden border border-[#E5E1D8]" data-testid="real-restaurants-map">
-      {/* Header */}
-      <div className="bg-[#1E3F20] text-white px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <MapPin className="w-5 h-5 text-[#E5F943]" />
-          <div>
-            <p className="font-bold text-sm">Restaurantes Próximos</p>
-            <p className="text-xs text-white/70">{restaurants.length} restaurantes em {radius/1000}km</p>
-          </div>
-        </div>
-        {loading && (
-          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        )}
-      </div>
-
+    <div className="rounded-xl overflow-hidden" data-testid="real-restaurants-map">
       {/* Map */}
       <div style={{ height: "400px" }}>
         <GoogleMap
@@ -291,42 +277,6 @@ export default function RealRestaurantsMap({ center, radius = 2000, onSelectRest
             </InfoWindow>
           )}
         </GoogleMap>
-      </div>
-
-      {/* Restaurant List */}
-      <div className="max-h-[200px] overflow-y-auto">
-        {restaurants.map((place) => (
-          <div
-            key={place.place_id}
-            className="flex items-center gap-3 px-4 py-3 border-b border-[#E5E1D8] hover:bg-[#F3EFE9] cursor-pointer transition-colors"
-            onClick={() => handleMarkerClick(place)}
-            data-testid={`restaurant-${place.place_id}`}
-          >
-            {place.photos && place.photos[0] ? (
-              <img
-                src={place.photos[0].getUrl({ maxWidth: 60 })}
-                alt={place.name}
-                className="w-12 h-12 rounded-lg object-cover"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-lg bg-[#E5E1D8] flex items-center justify-center text-xl">
-                🍽
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm truncate">{place.name}</h4>
-              <div className="flex items-center gap-2 text-xs text-[#5C635A]">
-                <span className="flex items-center gap-1 text-[#D97746] font-bold">
-                  ⭐ {place.rating?.toFixed(1)}
-                </span>
-                <span>({place.user_ratings_total})</span>
-                {place.price_level && <span className="text-[#1E3F20] font-bold">{getPriceLevel(place.price_level)}</span>}
-              </div>
-              <p className="text-xs text-[#5C635A] truncate">{place.vicinity}</p>
-            </div>
-            <Navigation className="w-4 h-4 text-[#5C635A]" />
-          </div>
-        ))}
       </div>
     </div>
   );
