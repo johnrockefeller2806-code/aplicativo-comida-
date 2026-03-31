@@ -379,13 +379,25 @@ export default function RiderApp() {
           <div className="animate-fade-in-up">
             {/* Google Maps - Full Screen */}
             {profile?.online && (
-              <div className="mb-4 rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
-                <SimpleGoogleMap height="calc(100vh - 320px)" />
+              <div className="rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg" style={{ height: "calc(100vh - 180px)" }}>
+                <SimpleGoogleMap height="100%" />
               </div>
             )}
 
-            {/* Available Orders Section */}
-            <h2 className="font-heading font-bold text-xl mb-4">Available Orders</h2>
+            {/* Offline State */}
+            {!profile?.online && (
+              <div className="text-center py-16">
+                <Power className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
+                <p className="text-[#5C635A] text-lg mb-4">You're offline</p>
+                <button
+                  onClick={toggleOnline}
+                  className="px-8 py-3 bg-[#D97746] text-white rounded-full font-bold hover:bg-[#C46838] transition-all active:scale-95"
+                  data-testid="go-online-btn"
+                >
+                  Go Online
+                </button>
+              </div>
+            )}
 
             {/* Active Deliveries with Tracker */}
             {activeOrders.length > 0 && (
@@ -410,68 +422,6 @@ export default function RiderApp() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Available Orders */}
-            <h2 className="font-heading font-bold text-xl mb-4">
-              {profile?.online ? "Available Orders" : "Go online to see orders"}
-            </h2>
-
-            {!profile?.online ? (
-              <div className="text-center py-16">
-                <Power className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
-                <p className="text-[#5C635A] text-lg mb-4">You're offline</p>
-                <button
-                  onClick={toggleOnline}
-                  className="px-8 py-3 bg-[#D97746] text-white rounded-full font-bold hover:bg-[#C46838] transition-all active:scale-95"
-                  data-testid="go-online-btn"
-                >
-                  Go Online
-                </button>
-              </div>
-            ) : available.length === 0 ? (
-              <div className="text-center py-16">
-                <Package className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
-                <p className="text-[#5C635A] text-lg">No orders available right now</p>
-                <p className="text-sm text-[#5C635A] mt-1">Stay online - new orders appear automatically</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {available.map(order => (
-                  <div key={order.id} className="bg-white rounded-xl border border-[#E5E1D8] p-5 card-hover" data-testid={`available-order-${order.id}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="font-heading font-bold">{order.restaurant_name}</p>
-                        <p className="text-sm text-[#5C635A]">{order.items?.length} items - {order.distance_km?.toFixed(1) || "?"} km</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-heading font-bold text-xl text-[#D97746]">EUR {order.rider_amount?.toFixed(2)}</p>
-                        <p className="text-xs text-[#5C635A]">
-                          {order.tip > 0 ? `delivery EUR ${order.delivery_fee?.toFixed(2)} + tip EUR ${order.tip?.toFixed(2)}` : `EUR 1.50/km`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-[#5C635A] mb-4">
-                      <MapPin className="w-4 h-4" />
-                      <span>{order.delivery_address}</span>
-                    </div>
-                    {order.tip > 0 && (
-                      <div className="mb-3 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm text-green-700 font-semibold flex items-center gap-1">
-                          <Heart className="w-4 h-4" /> Customer tipped EUR {order.tip?.toFixed(2)}!
-                        </p>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => acceptOrder(order.id)}
-                      className="w-full py-3 bg-[#D97746] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#C46838] transition-colors active:scale-95"
-                      data-testid={`accept-available-${order.id}`}
-                    >
-                      <Zap className="w-5 h-5" /> Accept Order
-                    </button>
-                  </div>
-                ))}
               </div>
             )}
           </div>
