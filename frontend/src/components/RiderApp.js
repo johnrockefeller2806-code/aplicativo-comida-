@@ -283,91 +283,7 @@ export default function RiderApp() {
         </div>
       </nav>
 
-      {/* New Order Alert Banner - Centered */}
-      {newOrderAlert && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: '16px',
-            left: '0',
-            right: '0',
-            display: 'flex',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '0 16px'
-          }}
-          data-testid="new-order-alert"
-        >
-          <div style={{
-            backgroundColor: 'white',
-            padding: '16px',
-            borderRadius: '16px',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-            border: '2px solid #D97746',
-            width: '100%',
-            maxWidth: '350px'
-          }}>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: '#D97746',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Volume2 style={{ width: '20px', height: '20px', color: 'white' }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 'bold', fontSize: '14px', margin: 0 }}>{newOrderAlert.title}</p>
-                <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{newOrderAlert.message}</p>
-                {newOrderAlert.delivery_address && (
-                  <p style={{ fontSize: '11px', color: '#666', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <MapPin style={{ width: '12px', height: '12px' }} /> 
-                    {newOrderAlert.delivery_address}
-                  </p>
-                )}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                  <button
-                    onClick={() => { setNewOrderAlert(null); setActiveTab("deliveries"); }}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      backgroundColor: '#D97746',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '20px',
-                      fontWeight: 'bold',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => setNewOrderAlert(null)}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      backgroundColor: '#eee',
-                      color: '#666',
-                      border: 'none',
-                      borderRadius: '20px',
-                      fontWeight: '500',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Removed floating notification - orders will show in deliveries tab */}
 
       {/* Student Hours Warning */}
       {isStudent && (
@@ -423,10 +339,55 @@ export default function RiderApp() {
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="h-full p-4 overflow-auto">
-            {/* Google Maps - Full Screen (only when no active orders) */}
-            {profile?.online && activeOrders.length === 0 && (
+            {/* Google Maps - Full Screen (only when no active orders and no available orders) */}
+            {profile?.online && activeOrders.length === 0 && available.length === 0 && (
               <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
                 <SimpleGoogleMap height="100%" />
+              </div>
+            )}
+
+            {/* Available Orders - Show when there are orders to accept */}
+            {profile?.online && available.length > 0 && (
+              <div className="h-full overflow-auto">
+                <div className="max-w-lg mx-auto">
+                  <h2 className="font-bold text-xl mb-4 text-center flex items-center justify-center gap-2">
+                    <span className="w-3 h-3 bg-[#D97746] rounded-full animate-pulse" />
+                    New Orders ({available.length})
+                  </h2>
+                  <div className="space-y-4">
+                    {available.map(order => (
+                      <div key={order.id} className="bg-white rounded-xl border-2 border-[#D97746] p-4 shadow-lg" data-testid={`available-order-${order.id}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="font-bold">{order.restaurant_name}</p>
+                            <p className="text-sm text-gray-500">{order.items?.length} items</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-xl text-[#D97746]">€{order.rider_amount?.toFixed(2)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                          <MapPin className="w-4 h-4" />
+                          <span>{order.delivery_address}</span>
+                        </div>
+                        {order.tip > 0 && (
+                          <div className="mb-3 px-3 py-2 bg-green-50 rounded-lg">
+                            <p className="text-sm text-green-700 font-semibold flex items-center gap-1">
+                              <Heart className="w-4 h-4" /> Tip: €{order.tip?.toFixed(2)}
+                            </p>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => acceptOrder(order.id)}
+                          className="w-full py-3 bg-[#D97746] text-white rounded-xl font-bold flex items-center justify-center gap-2"
+                          data-testid={`accept-order-${order.id}`}
+                        >
+                          <Zap className="w-5 h-5" /> Accept Order
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
