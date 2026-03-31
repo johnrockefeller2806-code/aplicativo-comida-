@@ -402,156 +402,25 @@ export default function RiderApp() {
         </div>
       </div>
 
-      {/* Deliveroo Style Full Screen Map - OUTSIDE main */}
-      {showDeliverooMap && (
-        <div className="fixed inset-0 z-[100] bg-[#1d2c4d]">
-          <DeliverooStyleMap
-            riderName={profile?.name || user?.name || "Rider"}
-            isOnline={profile?.online}
-            onToggleOnline={toggleOnline}
-            onChangeArea={(zone) => {
-              setRiderPosition({ lat: zone.lat, lng: zone.lng });
-              toast.success(`Área alterada para ${zone.name}`);
-            }}
-          />
-          <button
-            onClick={() => setShowDeliverooMap(false)}
-            className="absolute top-4 right-4 z-[110] w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      )}
-
       <main className="max-w-6xl mx-auto px-6 py-6">
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="animate-fade-in-up">
-            {/* Full Screen Map Button */}
-            <button
-              onClick={() => setShowDeliverooMap(true)}
-              className="w-full mb-4 py-3 bg-gradient-to-r from-[#00CCBC] to-[#00A89D] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
-              data-testid="deliveroo-map-btn"
-            >
-              <Navigation className="w-5 h-5" />
-              Abrir Mapa Completo (Estilo Deliveroo)
-            </button>
-
-            {/* Toggle between maps */}
-            {profile?.online && (
-              <div className="mb-4 flex gap-2">
-                <button
-                  onClick={() => setShowRealMap(false)}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
-                    !showRealMap ? "bg-[#1E3F20] text-white" : "bg-white border border-[#E5E1D8] text-[#5C635A]"
-                  }`}
-                >
-                  <MapIcon className="w-4 h-4" />
-                  Restaurantes do App
-                </button>
-                <button
-                  onClick={() => setShowRealMap(true)}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
-                    showRealMap ? "bg-[#D97746] text-white" : "bg-white border border-[#E5E1D8] text-[#5C635A]"
-                  }`}
-                >
-                  <Globe className="w-4 h-4" />
-                  Restaurantes Reais (Google)
-                </button>
-              </div>
-            )}
-
-            {/* Google Maps - Real Restaurants */}
-            {profile?.online && showRealMap && !showDeliverooMap && (
-              <div className="mb-6">
-                <RealRestaurantsMap 
-                  center={riderPosition}
-                  radius={radiusKm * 1000}
+            {/* Deliveroo Style Map - Integrated */}
+            {profile?.online && !showDeliverooMap && (
+              <div className="mb-6 rounded-xl overflow-hidden border border-[#2d2d44] shadow-xl" style={{ height: "450px" }}>
+                <DeliverooStyleMap
+                  riderName={profile?.name || user?.name || "Rider"}
+                  isOnline={profile?.online}
+                  onToggleOnline={toggleOnline}
+                  onChangeArea={(zone) => {
+                    setRiderPosition({ lat: zone.lat, lng: zone.lng });
+                    toast.success(`Área alterada para ${zone.name}`);
+                  }}
                 />
               </div>
             )}
 
-            {/* Leaflet Map - App Restaurants */}
-            {profile?.online && !showRealMap && !showDeliverooMap && (
-              <div className="mb-6 bg-white rounded-xl border border-[#E5E1D8] overflow-hidden" data-testid="rider-map-section">
-                <div className="px-5 py-3 border-b border-[#E5E1D8] flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapIcon className="w-5 h-5 text-[#8B5E3C]" />
-                    <h3 className="font-heading font-bold text-sm">Nearby Restaurants</h3>
-                  </div>
-                  <span className="text-xs text-[#5C635A] bg-[#F3EFE9] px-3 py-1 rounded-full">
-                    {radiusKm} km radius
-                  </span>
-                </div>
-                <div style={{ height: "350px", width: "100%" }}>
-                  <MapContainer
-                    center={[riderPosition.lat, riderPosition.lng]}
-                    zoom={13}
-                    style={{ height: "100%", width: "100%" }}
-                    zoomControl={true}
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    {/* Rider position */}
-                    <Marker position={[riderPosition.lat, riderPosition.lng]} icon={riderIcon}>
-                      <Popup>
-                        <div className="text-center">
-                          <strong>You are here</strong>
-                          <br />
-                          <span className="text-xs text-gray-500">{profile?.online ? "Online" : "Offline"}</span>
-                        </div>
-                      </Popup>
-                    </Marker>
-                    {/* Radius circle */}
-                    <Circle
-                      center={[riderPosition.lat, riderPosition.lng]}
-                      radius={radiusKm * 1000}
-                      pathOptions={{
-                        color: "#D97746",
-                        fillColor: "#D97746",
-                        fillOpacity: 0.08,
-                        weight: 2,
-                        dashArray: "8 4",
-                      }}
-                    />
-                    {/* Restaurant markers */}
-                    {nearbyRestaurants.map(r => (
-                      <Marker key={r.id} position={[r.lat, r.lng]} icon={restaurantIcon}>
-                        <Popup>
-                          <div style={{ minWidth: "160px" }}>
-                            <strong style={{ fontSize: "14px" }}>{r.name}</strong>
-                            <br />
-                            <span style={{ fontSize: "11px", color: "#666" }}>{r.cuisine_type}</span>
-                            <br />
-                            <span style={{ fontSize: "11px", color: "#666" }}>{r.address}</span>
-                            <br />
-                            <span style={{ fontSize: "12px", color: "#D97746", fontWeight: "bold" }}>⭐ {r.rating}</span>
-                          </div>
-                        </Popup>
-                      </Marker>
-                    ))}
-                    <FitBounds positions={[
-                      riderPosition,
-                      ...nearbyRestaurants.map(r => ({ lat: r.lat, lng: r.lng }))
-                    ]} />
-                  </MapContainer>
-                </div>
-                <div className="px-5 py-3 bg-[#FAF9F6] border-t border-[#E5E1D8] flex items-center gap-4 flex-wrap">
-                  {nearbyRestaurants.map(r => (
-                    <div key={r.id} className="flex items-center gap-2 text-xs" data-testid={`map-restaurant-${r.id}`}>
-                      <div className="w-3 h-3 bg-[#1E3F20] rounded-full" />
-                      <span className="font-medium">{r.name}</span>
-                    </div>
-                  ))}
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 bg-[#D97746] rounded-full" />
-                    <span className="font-medium">Your location</span>
-                  </div>
-                </div>
-              </div>
-            )}
             {/* Active Deliveries with Tracker */}
             {activeOrders.length > 0 && (
               <div className="mb-8">
