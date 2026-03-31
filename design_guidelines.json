@@ -1,0 +1,87 @@
+{
+  "theme": "light",
+  "archetype": "1_organic_earthy",
+  "domain": "Food Delivery Platform (Dublin)",
+  "brand_name": "SwiftBite",
+  "typography": {
+    "heading": "Cabinet Grotesk",
+    "body": "Work Sans",
+    "rules": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter font-black",
+      "h2": "text-3xl sm:text-4xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-bold",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs tracking-[0.2em] uppercase font-bold text-[#5C635A]"
+    }
+  },
+  "colors": {
+    "background_base": "#FAF9F6",
+    "background_surface": "#F3EFE9",
+    "text_primary": "#1A1D1A",
+    "text_secondary": "#5C635A",
+    "brand_primary": "#1E3F20",
+    "brand_accent": "#D97746",
+    "rider_utility": "#E5F943",
+    "border_subtle": "#E5E1D8",
+    "glass_surface": "bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm"
+  },
+  "layout_strategies": {
+    "marketing": {
+      "style": "Bento Grid, Generous Spacing",
+      "classes": "grid grid-cols-1 md:grid-cols-12 gap-8 py-24 px-6 md:px-12",
+      "hero_overlay": "bg-black/30"
+    },
+    "dashboards": {
+      "style": "Control Room Grid, Dense Data",
+      "classes": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6",
+      "cards": "bg-[#FAF9F6] border border-[#E5E1D8] rounded-xl shadow-sm hover:shadow-md transition-shadow"
+    }
+  },
+  "media_urls": {
+    "hero_landing": {
+      "url": "https://images.unsplash.com/photo-1757777440206-00dcce0205e3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxmb29kJTIwZGVsaXZlcnklMjByaWRlciUyMGJpY3ljbGV8ZW58MHx8fHwxNzc0NDg5NDM0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Delivery person riding bicycle on tree-lined street",
+      "placement": "Landing page main hero image"
+    },
+    "restaurant_hero": {
+      "url": "https://images.unsplash.com/photo-1642522685167-cf414ea225be?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwzfHxiYWtlZCUyMHBvdGF0byUyMGZvb2R8ZW58MHx8fHwxNzc0NDg5NDE0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Baked potato covered in cheese and broccoli",
+      "placement": "Crazy Potato restaurant detail header"
+    },
+    "food_item_1": {
+      "url": "https://images.pexels.com/photos/4110468/pexels-photo-4110468.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Three baked potato halves with butter on a rustic wooden tray",
+      "placement": "Menu item thumbnail / Product page"
+    },
+    "dublin_context": {
+      "url": "https://images.pexels.com/photos/2416654/pexels-photo-2416654.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Colorful Georgian-style buildings in Dublin",
+      "placement": "Background for role selection or about section"
+    }
+  },
+  "components": {
+    "navigation": "Use crystal glassmorphism for public pages, solid background with sharp bottom borders for dashboards.",
+    "buttons": "Rounded full (rounded-full) for primary marketing CTAs, rounded-md for dashboard utilities.",
+    "charts": "Use Recharts/Shadcn for payment splits. Use Brand Primary (#1E3F20) and Brand Accent (#D97746).",
+    "data_display": "Minimalist cardless tables in dashboards. Border-b only."
+  },
+  "motion_and_interactions": {
+    "hover": "Subtle hover:-translate-y-1 and hover:shadow-lg transition-all duration-300 on interactive cards.",
+    "click": "Scale down slightly on active (active:scale-95).",
+    "loading": "Use skeleton loaders matching the exact shape of the content to be loaded."
+  },
+  "testing": {
+    "rules": "All interactive and key informational elements MUST include a data-testid attribute in kebab-case format (e.g., login-submit-button, order-track-status)."
+  },
+  "feature_specific_rules": {
+    "student_rider": "Use a circular progress indicator for the 20h limit. Warn with brand accent color when close to limit.",
+    "payment_split": "Display a horizontal stacked bar showing Rider/Restaurant/Platform split."
+  },
+  "instructions_to_main_agent": [
+    "Use Javascript (.js), NOT Typescript (.tsx).",
+    "Never use placeholder images. Rely entirely on the provided media_urls.",
+    "Strictly follow the Archetype 1 (Organic & Earthy) color palette.",
+    "Do not center-align everything; use deliberate asymmetry in marketing sections.",
+    "Prioritize Shadcn components for complex interactions (Forms, Modals, Tabs, Select)."
+  ]
+}

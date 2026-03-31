@@ -1,53 +1,102 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Toaster } from "sonner";
+import Landing from "./components/Landing";
+import Auth from "./components/Auth";
+import CustomerApp from "./components/CustomerApp";
+import RestaurantApp from "./components/RestaurantApp";
+import RiderApp from "./components/RiderApp";
+import "@/App.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+export const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+export const AuthContext = createContext(null);
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("kang_token"));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    helloWorldApi();
-  }, []);
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.get(`${API}/auth/me`)
+        .then(res => { setUser(res.data); setLoading(false); })
+        .catch(() => { logout(); setLoading(false); });
+    } else {
+      setLoading(false);
+    }
+  }, [token]);
+
+  const login = (tkn, usr) => {
+    localStorage.setItem("kang_token", tkn);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${tkn}`;
+    setToken(tkn);
+    setUser(usr);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("kang_token");
+    delete axios.defaults.headers.common["Authorization"];
+    setToken(null);
+    setUser(null);
+  };
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
   );
-};
+}
+
+function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6]">
+        <div className="text-center">
+          <img src="/logo.png" alt="Kangaroos" className="w-20 h-20 mx-auto mb-4 object-contain" />
+          <p className="text-[#5C635A] font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/auth/:role" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
+      {user.role === "customer" && <Route path="/*" element={<CustomerApp />} />}
+      {user.role === "restaurant" && <Route path="/*" element={<RestaurantApp />} />}
+      {user.role === "rider" && <Route path="/*" element={<RiderApp />} />}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+        <Toaster position="top-right" richColors />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
