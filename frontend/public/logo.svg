@@ -1,50 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" fill="none">
-  <!-- Shield Outer Border - Blue Gradient -->
-  <path d="M100 10 L180 35 L180 110 C180 170 140 210 100 240 C60 210 20 170 20 110 L20 35 Z" 
-        stroke="url(#shieldGradient)" stroke-width="6" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Kangaroo body -->
+  <ellipse cx="45" cy="55" rx="22" ry="28" fill="#D97746"/>
   
-  <!-- Shield Inner Fill - Dark Blue -->
-  <path d="M100 25 L165 45 L165 105 C165 155 135 190 100 215 C65 190 35 155 35 105 L35 45 Z" 
-        fill="url(#innerGradient)"/>
+  <!-- Kangaroo head -->
+  <ellipse cx="58" cy="28" rx="16" ry="14" fill="#D97746"/>
   
-  <!-- Eye White Part (Sclera) - Curved shape -->
-  <ellipse cx="100" cy="110" rx="45" ry="30" fill="#e8eef5" opacity="0.9"/>
+  <!-- Ear left -->
+  <ellipse cx="48" cy="12" rx="5" ry="10" fill="#D97746"/>
+  <ellipse cx="48" cy="12" rx="3" ry="7" fill="#E8A87C"/>
   
-  <!-- Eye Blue Swirl/Iris - Main blue part -->
-  <path d="M100 80 C130 80 150 100 145 125 C140 145 120 155 100 150 C75 145 60 120 70 95 C75 82 88 80 100 80Z" 
-        fill="url(#eyeGradient)"/>
+  <!-- Ear right -->
+  <ellipse cx="62" cy="10" rx="5" ry="10" fill="#D97746"/>
+  <ellipse cx="62" cy="10" rx="3" ry="7" fill="#E8A87C"/>
   
-  <!-- Eye Pupil - Dark circle -->
-  <circle cx="105" cy="115" r="22" fill="#0a1628"/>
+  <!-- Eye -->
+  <circle cx="62" cy="26" r="4" fill="#1A1D1A"/>
+  <circle cx="63" cy="25" r="1.5" fill="white"/>
   
-  <!-- Checkmark inside pupil -->
-  <path d="M92 115 L102 125 L120 105" 
-        stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Nose -->
+  <ellipse cx="72" cy="30" rx="4" ry="3" fill="#8B4513"/>
   
-  <!-- Eye highlight -->
-  <circle cx="115" cy="105" r="5" fill="white" opacity="0.6"/>
+  <!-- Snout -->
+  <ellipse cx="68" cy="32" rx="8" ry="6" fill="#E8A87C"/>
   
-  <!-- Text: Check (white) -->
-  <text x="28" y="265" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white">Check</text>
+  <!-- Smile -->
+  <path d="M65 36 Q68 40 72 36" stroke="#1A1D1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
   
-  <!-- Text: Kids (blue) -->
-  <text x="108" y="265" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#3b82f6">Kids</text>
+  <!-- Front leg -->
+  <ellipse cx="55" cy="70" rx="6" ry="10" fill="#D97746"/>
   
-  <!-- Gradients -->
-  <defs>
-    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60a5fa"/>
-      <stop offset="50%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#1e40af"/>
-    </linearGradient>
-    <linearGradient id="innerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e3a5f"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="eyeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#93c5fd"/>
-      <stop offset="50%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#1d4ed8"/>
-    </linearGradient>
-  </defs>
+  <!-- Back leg (big) -->
+  <ellipse cx="32" cy="75" rx="10" ry="8" fill="#D97746"/>
+  <ellipse cx="22" cy="78" rx="8" ry="5" fill="#D97746"/>
+  
+  <!-- Tail -->
+  <path d="M25 50 Q5 60 15 80" stroke="#D97746" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Pouch with food bag -->
+  <ellipse cx="52" cy="60" rx="10" ry="8" fill="#E8A87C"/>
+  <rect x="46" y="54" width="12" height="10" rx="2" fill="#1E3F20"/>
+  <rect x="48" y="52" width="8" height="3" rx="1" fill="#2D5A30"/>
+  
+  <!-- Speed lines -->
+  <path d="M80 45 L95 45" stroke="#1E3F20" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <path d="M82 52 L92 52" stroke="#1E3F20" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M80 59 L90 59" stroke="#1E3F20" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
 </svg>

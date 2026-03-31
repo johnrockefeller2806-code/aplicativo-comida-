@@ -44,7 +44,7 @@ export default function Auth() {
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12" style={{ background: info.color }}>
         <div className="text-white text-center max-w-md">
-          <img src="/logo.png" alt="Kangaroos" className="w-24 h-24 mx-auto mb-8 object-contain" />
+          <img src="/logo.svg" alt="Kangaroos" className="w-24 h-24 mx-auto mb-8 object-contain" />
           <h2 className="font-heading font-bold text-4xl mb-4">Kangaroos</h2>
           <p className="text-white/80 text-lg">Fast Delivery, Fair for Everyone</p>
         </div>
