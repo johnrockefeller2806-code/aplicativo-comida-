@@ -172,17 +172,6 @@ export default function RealRestaurantsMap({ center, radius = 2000, onSelectRest
             zIndex={1000}
           />
 
-          {/* Restaurant Markers */}
-          {restaurants.map((place) => (
-            <Marker
-              key={place.place_id}
-              position={place.geometry.location}
-              icon={createRestaurantIcon(place.rating)}
-              title={place.name}
-              onClick={() => handleMarkerClick(place)}
-            />
-          ))}
-
           {/* Info Window */}
           {selectedPlace && placeDetails && (
             <InfoWindow
