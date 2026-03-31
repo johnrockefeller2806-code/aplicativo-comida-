@@ -13,12 +13,14 @@ Delivery platform for Dublin connecting customers, restaurants, and riders. Key 
 
 ## Tech Stack
 - Frontend: React, TailwindCSS, Lucide, Sonner, Google Maps API, qrcode.react, html5-qrcode
-- Backend: FastAPI, Motor (MongoDB), PyJWT, bcrypt
+- Backend: FastAPI, Motor (MongoDB), PyJWT, bcrypt, httpx
 - Database: MongoDB (test_database)
+- Auth: Emergent Google OAuth + JWT email/password
 
 ## Implemented
 - Landing page with role selection
-- JWT auth for all roles
+- JWT auth for all roles (email/password)
+- **Google OAuth login** via Emergent Auth (all roles: customer, rider, restaurant)
 - Customer: Browse restaurants, cart, orders, real-time tracking with Google Maps
 - Restaurant: Order management, menu CRUD, stats
 - Rider: Online toggle, accept orders (max 3), earnings, full-screen Google Map
@@ -42,6 +44,7 @@ Delivery platform for Dublin connecting customers, restaurants, and riders. Key 
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── Auth.js             # Login/Register + Google OAuth
 │   │   │   ├── RiderApp.js         # Rider dashboard, GPS broadcasting, "Ir ao Cliente"
 │   │   │   ├── CustomerApp.js      # Customer dashboard, QR Scanner
 │   │   │   ├── OrderTracker.js     # Order progress stepper + delivery map
@@ -49,12 +52,13 @@ Delivery platform for Dublin connecting customers, restaurants, and riders. Key 
 │   │   │   ├── SimpleGoogleMap.js  # Rider idle map
 │   │   │   ├── googleMapsConfig.js # Centralized Maps API loader
 │   │   │   └── QRScanner.js        # html5-qrcode scanner
-│   │   ├── App.js
+│   │   ├── App.js                  # Routes + AuthProvider (handles OAuth callback)
 │   │   └── index.css
 │   └── package.json
 ```
 
 ## Key API Endpoints
+- POST /api/auth/google - Exchange Emergent OAuth session_id for JWT token
 - PUT /api/rider/location - Rider sends GPS (updates order + rider_profiles)
 - GET /api/orders/{id}/tracking - Returns rider position (real or simulated)
 - POST /api/customer/confirm-delivery - Customer scans QR to complete delivery

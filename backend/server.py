@@ -10,6 +10,7 @@ import uuid
 import bcrypt
 import jwt
 import logging
+import httpx
 
 load_dotenv()
 
@@ -191,6 +192,104 @@ async def login(data: AuthLogin):
 @api_router.get("/auth/me")
 async def get_me(user: dict = Depends(get_current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"], "role": user["role"]}
+
+class GoogleAuthRequest(BaseModel):
+    session_id: str
+    role: str
+
+@api_router.post("/auth/google")
+async def google_auth(data: GoogleAuthRequest):
+    """Exchange Emergent OAuth session_id for app JWT token"""
+    if data.role not in ["customer", "restaurant", "rider"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    # Call Emergent Auth to verify session and get user info
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": data.session_id},
+                timeout=10.0
+            )
+            if resp.status_code != 200:
+                raise HTTPException(status_code=401, detail="Google auth failed")
+            google_data = resp.json()
+        except httpx.RequestError:
+            raise HTTPException(status_code=502, detail="Auth service unavailable")
+
+    email = google_data.get("email")
+    name = google_data.get("name", "")
+    picture = google_data.get("picture", "")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="No email from Google")
+
+    # Check if user already exists
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+
+    if existing:
+        # User exists - use their existing role and update info
+        user_id = existing["id"]
+        role = existing["role"]
+        await db.users.update_one(
+            {"email": email},
+            {"$set": {"name": name or existing.get("name", ""), "picture": picture}}
+        )
+    else:
+        # New user - create with the requested role
+        user_id = str(uuid.uuid4())
+        role = data.role
+        user = {
+            "id": user_id,
+            "name": name,
+            "email": email,
+            "password_hash": "",
+            "phone": None,
+            "role": role,
+            "picture": picture,
+            "auth_provider": "google",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.users.insert_one(user)
+
+        # Create role-specific profiles
+        if role == "restaurant":
+            await db.restaurants.insert_one({
+                "id": str(uuid.uuid4()),
+                "owner_id": user_id,
+                "name": name + "'s Restaurant",
+                "description": "",
+                "address": "Dublin, Ireland",
+                "cuisine_type": "General",
+                "image_url": None,
+                "prep_time_min": 25,
+                "rating": 4.5,
+                "active": True,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+
+        if role == "rider":
+            await db.rider_profiles.insert_one({
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "rider_type": "independent",
+                "vehicle_type": "bicycle",
+                "online": False,
+                "current_lat": 53.3498,
+                "current_lng": -6.2603,
+                "weekly_hours_used": 0.0,
+                "week_start_date": _get_week_start().isoformat(),
+                "hourly_rate": 13.0,
+                "total_earnings": 0.0,
+                "total_deliveries": 0,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+
+    token = create_token(user_id, role)
+    return {
+        "token": token,
+        "user": {"id": user_id, "name": name, "email": email, "role": role}
+    }
 
 # ============== RESTAURANTS ==============
 
