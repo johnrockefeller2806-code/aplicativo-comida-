@@ -5,13 +5,14 @@ import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import QRScanner from "./QRScanner";
 import RealRestaurantsMap from "./RealRestaurantsMap";
+import DeliverooStyleMap from "./DeliverooStyleMap";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
   Check, RefreshCw, Zap, AlertTriangle, TrendingUp, Timer,
-  Bell, X, Volume2, Heart, Map as MapIcon, QrCode, Globe
+  Bell, X, Volume2, Heart, Map as MapIcon, QrCode, Globe, Navigation
 } from "lucide-react";
 
 // Custom marker icons
@@ -79,6 +80,7 @@ export default function RiderApp() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [qrProcessing, setQrProcessing] = useState(false);
   const [showRealMap, setShowRealMap] = useState(false);
+  const [showDeliverooMap, setShowDeliverooMap] = useState(false);
   const prevUnreadRef = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -400,10 +402,41 @@ export default function RiderApp() {
         </div>
       </div>
 
+      {/* Deliveroo Style Full Screen Map - OUTSIDE main */}
+      {showDeliverooMap && (
+        <div className="fixed inset-0 z-[100] bg-[#1d2c4d]">
+          <DeliverooStyleMap
+            riderName={profile?.name || user?.name || "Rider"}
+            isOnline={profile?.online}
+            onToggleOnline={toggleOnline}
+            onChangeArea={(zone) => {
+              setRiderPosition({ lat: zone.lat, lng: zone.lng });
+              toast.success(`Área alterada para ${zone.name}`);
+            }}
+          />
+          <button
+            onClick={() => setShowDeliverooMap(false)}
+            className="absolute top-4 right-4 z-[110] w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       <main className="max-w-6xl mx-auto px-6 py-6">
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="animate-fade-in-up">
+            {/* Full Screen Map Button */}
+            <button
+              onClick={() => setShowDeliverooMap(true)}
+              className="w-full mb-4 py-3 bg-gradient-to-r from-[#00CCBC] to-[#00A89D] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
+              data-testid="deliveroo-map-btn"
+            >
+              <Navigation className="w-5 h-5" />
+              Abrir Mapa Completo (Estilo Deliveroo)
+            </button>
+
             {/* Toggle between maps */}
             {profile?.online && (
               <div className="mb-4 flex gap-2">
@@ -429,7 +462,7 @@ export default function RiderApp() {
             )}
 
             {/* Google Maps - Real Restaurants */}
-            {profile?.online && showRealMap && (
+            {profile?.online && showRealMap && !showDeliverooMap && (
               <div className="mb-6">
                 <RealRestaurantsMap 
                   center={riderPosition}
@@ -439,7 +472,7 @@ export default function RiderApp() {
             )}
 
             {/* Leaflet Map - App Restaurants */}
-            {profile?.online && !showRealMap && (
+            {profile?.online && !showRealMap && !showDeliverooMap && (
               <div className="mb-6 bg-white rounded-xl border border-[#E5E1D8] overflow-hidden" data-testid="rider-map-section">
                 <div className="px-5 py-3 border-b border-[#E5E1D8] flex items-center justify-between">
                   <div className="flex items-center gap-2">
