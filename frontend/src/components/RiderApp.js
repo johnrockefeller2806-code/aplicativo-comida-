@@ -374,9 +374,9 @@ export default function RiderApp() {
       <main className="flex-1 overflow-hidden">
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
-          <div className="h-full p-4">
-            {/* Google Maps - Full Screen */}
-            {profile?.online && (
+          <div className="h-full p-4 overflow-auto">
+            {/* Google Maps - Full Screen (only when no active orders) */}
+            {profile?.online && activeOrders.length === 0 && (
               <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
                 <SimpleGoogleMap height="100%" />
               </div>
@@ -405,8 +405,8 @@ export default function RiderApp() {
 
             {/* Active Deliveries with Tracker */}
             {activeOrders.length > 0 && (
-              <div className="mb-8">
-                <h2 className="font-heading font-bold text-xl mb-4 flex items-center gap-2">
+              <div className="max-w-lg mx-auto">
+                <h2 className="font-heading font-bold text-xl mb-4 flex items-center justify-center gap-2">
                   <span className="w-3 h-3 bg-green-500 rounded-full pulse-dot" />
                   Active Deliveries ({activeOrders.length}/3)
                 </h2>
