@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from "@react-google-maps/api";
 import { Navigation, MapPin, Clock, Bike } from "lucide-react";
 import { GOOGLE_MAPS_CONFIG } from "./googleMapsConfig";
+import axios from "axios";
+import { API } from "../App";
 
 const mapContainerStyle = {
   width: "100%",
@@ -70,8 +72,9 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
   const [riderPosition, setRiderPosition] = useState(null);
   const [eta, setEta] = useState(null);
   const [distance, setDistance] = useState(null);
+  const [deliveryProgress, setDeliveryProgress] = useState(0);
   const mapRef = useRef(null);
-  const animationRef = useRef(null);
+  const directionsCalculated = useRef(false);
 
   const restaurantPos = {
     lat: order?.restaurant_lat || 53.3498,
@@ -93,11 +96,33 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
     } else {
       setRiderPosition(restaurantPos);
     }
-  }, [order?.rider_lat, order?.rider_lng]);
+  }, []);
 
-  // Calculate route
+  // Poll real-time tracking endpoint
+  useEffect(() => {
+    if (!order?.id || order.status !== "picked_up") return;
+
+    const fetchTracking = async () => {
+      try {
+        const res = await axios.get(`${API}/orders/${order.id}/tracking`);
+        const data = res.data;
+        if (data.rider_lat && data.rider_lng) {
+          setRiderPosition({ lat: data.rider_lat, lng: data.rider_lng });
+        }
+        if (data.delivery_progress !== undefined) {
+          setDeliveryProgress(data.delivery_progress);
+        }
+      } catch {}
+    };
+
+    fetchTracking();
+    const interval = setInterval(fetchTracking, 4000);
+    return () => clearInterval(interval);
+  }, [order?.id, order?.status]);
+
+  // Calculate route (once when rider position and map are loaded)
   const calculateRoute = useCallback(async () => {
-    if (!isLoaded || !window.google || !riderPosition) return;
+    if (!isLoaded || !window.google || !riderPosition || directionsCalculated.current) return;
 
     const directionsService = new window.google.maps.DirectionsService();
 
@@ -109,8 +134,8 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
       });
 
       setDirections(result);
+      directionsCalculated.current = true;
 
-      // Extract ETA and distance
       const leg = result.routes[0]?.legs[0];
       if (leg) {
         setEta(leg.duration?.text);
@@ -124,46 +149,6 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
   useEffect(() => {
     calculateRoute();
   }, [calculateRoute]);
-
-  // Simulate rider movement (in production, this would come from real GPS)
-  useEffect(() => {
-    if (!order || order.status !== "picked_up" || !directions) return;
-
-    const path = directions.routes[0]?.overview_path;
-    if (!path || path.length === 0) return;
-
-    let currentIndex = 0;
-    const totalPoints = path.length;
-
-    // Calculate how far along the rider should be based on pickup time
-    if (order.picked_up_at) {
-      const pickupTime = new Date(order.picked_up_at).getTime();
-      const elapsed = (Date.now() - pickupTime) / 1000;
-      const totalDeliveryTime = 600; // 10 min estimate
-      const progress = Math.min(elapsed / totalDeliveryTime, 0.95);
-      currentIndex = Math.floor(progress * totalPoints);
-    }
-
-    const animate = () => {
-      if (currentIndex < totalPoints - 1) {
-        const point = path[currentIndex];
-        setRiderPosition({
-          lat: point.lat(),
-          lng: point.lng(),
-        });
-        currentIndex++;
-        animationRef.current = setTimeout(animate, 2000); // Move every 2 seconds
-      }
-    };
-
-    animate();
-
-    return () => {
-      if (animationRef.current) {
-        clearTimeout(animationRef.current);
-      }
-    };
-  }, [order, directions]);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;

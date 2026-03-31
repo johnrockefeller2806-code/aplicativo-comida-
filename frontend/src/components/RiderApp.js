@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import SimpleGoogleMap from "./SimpleGoogleMap";
 import { QRCodeSVG } from "qrcode.react";
-import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
   Check, RefreshCw, Zap, AlertTriangle, TrendingUp, Timer,
@@ -151,6 +150,54 @@ export default function RiderApp() {
       fetchData();
     } catch (err) {
       toast.error("Error completing delivery");
+    }
+  };
+
+  // GPS broadcasting for active orders
+  const watchIdRef = useRef(null);
+  useEffect(() => {
+    if (activeOrders.length === 0) {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      return;
+    }
+    if (!navigator.geolocation) return;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setRiderPosition({ lat: latitude, lng: longitude });
+        // Send location to backend for each active order
+        activeOrders.forEach(order => {
+          axios.put(`${API}/rider/location`, {
+            order_id: order.id,
+            lat: latitude,
+            lng: longitude
+          }).catch(() => {});
+        });
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+    );
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [activeOrders]);
+
+  // Open external Google Maps navigation to customer
+  const navigateToCustomer = (order) => {
+    const lat = order.delivery_lat;
+    const lng = order.delivery_lng;
+    if (lat && lng) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
+    } else if (order.delivery_address) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.delivery_address)}&travelmode=driving`, '_blank');
     }
   };
 
@@ -404,6 +451,17 @@ export default function RiderApp() {
                   {activeOrders.map(order => (
                     <div key={order.id} data-testid={`active-delivery-${order.id}`}>
                       <OrderTracker order={order} variant="rider" />
+                      {/* Navigate to Customer Button */}
+                      <div className="mt-3 px-1">
+                        <button
+                          onClick={() => navigateToCustomer(order)}
+                          className="w-full py-3 bg-[#1E3F20] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#163018] transition-all active:scale-95 shadow-md"
+                          data-testid={`navigate-to-customer-${order.id}`}
+                        >
+                          <Navigation className="w-5 h-5" />
+                          Ir ao Cliente
+                        </button>
+                      </div>
                       {/* QR Code for Customer to Scan */}
                       <div className="mt-4 bg-white rounded-xl border-2 border-[#1E3F20] p-4 text-center">
                         <p className="font-bold text-sm mb-3">Mostre este QR para o cliente escanear</p>

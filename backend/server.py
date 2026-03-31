@@ -826,39 +826,65 @@ class RiderLocationUpdate(BaseModel):
 @api_router.put("/rider/location")
 async def update_rider_location(data: RiderLocationUpdate, user: dict = Depends(get_current_user)):
     """Rider updates their GPS position for a specific order"""
+    now = datetime.now(timezone.utc).isoformat()
     await db.orders.update_one(
         {"id": data.order_id},
-        {"$set": {"rider_lat": data.lat, "rider_lng": data.lng, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {"rider_lat": data.lat, "rider_lng": data.lng, "rider_location_updated_at": now, "updated_at": now}}
+    )
+    # Also update rider profile position
+    await db.rider_profiles.update_one(
+        {"user_id": user["id"]},
+        {"$set": {"current_lat": data.lat, "current_lng": data.lng}}
     )
     return {"message": "Location updated"}
 
 @api_router.get("/orders/{order_id}/tracking")
 async def get_order_tracking(order_id: str):
-    """Get order with simulated rider movement toward delivery address"""
+    """Get order with real-time rider position or simulated movement"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    # Simulate rider moving toward delivery address
     if order.get("status") == "picked_up" and order.get("picked_up_at"):
-        pickup_time = datetime.fromisoformat(order["picked_up_at"])
-        elapsed = (datetime.now(timezone.utc) - pickup_time).total_seconds()
-        total_delivery_time = 600  # 10 min delivery simulation
+        # Check if rider has sent real GPS recently (within 30s)
+        location_updated = order.get("rider_location_updated_at")
+        has_real_gps = False
+        if location_updated:
+            last_update = datetime.fromisoformat(location_updated)
+            age = (datetime.now(timezone.utc) - last_update).total_seconds()
+            has_real_gps = age < 30
 
-        progress = min(elapsed / total_delivery_time, 0.95)
+        if has_real_gps:
+            # Use real GPS position from rider
+            end_lat = order.get("delivery_lat", 53.3458)
+            end_lng = order.get("delivery_lng", -6.2575)
+            rider_lat = order.get("rider_lat", 53.3498)
+            rider_lng = order.get("rider_lng", -6.2603)
+            total_dist = haversine_km(order.get("restaurant_lat", 53.3498), order.get("restaurant_lng", -6.2603), end_lat, end_lng)
+            remaining_dist = haversine_km(rider_lat, rider_lng, end_lat, end_lng)
+            progress = max(0, min((1 - remaining_dist / max(total_dist, 0.01)) * 100, 99))
+            order["delivery_progress"] = round(progress, 1)
+            order["gps_source"] = "real"
+        else:
+            # Fallback to simulated movement
+            pickup_time = datetime.fromisoformat(order["picked_up_at"])
+            elapsed = (datetime.now(timezone.utc) - pickup_time).total_seconds()
+            total_delivery_time = 600
 
-        start_lat = order.get("restaurant_lat", 53.3498)
-        start_lng = order.get("restaurant_lng", -6.2603)
-        end_lat = order.get("delivery_lat", 53.3458)
-        end_lng = order.get("delivery_lng", -6.2575)
+            progress = min(elapsed / total_delivery_time, 0.95)
 
-        # Interpolate position with slight random offset for realism
-        current_lat = start_lat + (end_lat - start_lat) * progress + random.uniform(-0.0003, 0.0003)
-        current_lng = start_lng + (end_lng - start_lng) * progress + random.uniform(-0.0003, 0.0003)
+            start_lat = order.get("restaurant_lat", 53.3498)
+            start_lng = order.get("restaurant_lng", -6.2603)
+            end_lat = order.get("delivery_lat", 53.3458)
+            end_lng = order.get("delivery_lng", -6.2575)
 
-        order["rider_lat"] = round(current_lat, 7)
-        order["rider_lng"] = round(current_lng, 7)
-        order["delivery_progress"] = round(progress * 100, 1)
+            current_lat = start_lat + (end_lat - start_lat) * progress + random.uniform(-0.0003, 0.0003)
+            current_lng = start_lng + (end_lng - start_lng) * progress + random.uniform(-0.0003, 0.0003)
+
+            order["rider_lat"] = round(current_lat, 7)
+            order["rider_lng"] = round(current_lng, 7)
+            order["delivery_progress"] = round(progress * 100, 1)
+            order["gps_source"] = "simulated"
 
     return order
 
