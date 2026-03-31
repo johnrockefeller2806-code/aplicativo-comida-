@@ -4,13 +4,14 @@ import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import QRScanner from "./QRScanner";
+import RealRestaurantsMap from "./RealRestaurantsMap";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
   Check, RefreshCw, Zap, AlertTriangle, TrendingUp, Timer,
-  Bell, X, Volume2, Heart, Map as MapIcon, QrCode
+  Bell, X, Volume2, Heart, Map as MapIcon, QrCode, Globe
 } from "lucide-react";
 
 // Custom marker icons
@@ -77,6 +78,7 @@ export default function RiderApp() {
   const [riderPosition, setRiderPosition] = useState({ lat: 53.3498, lng: -6.2603 });
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [qrProcessing, setQrProcessing] = useState(false);
+  const [showRealMap, setShowRealMap] = useState(false);
   const prevUnreadRef = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -402,8 +404,42 @@ export default function RiderApp() {
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="animate-fade-in-up">
-            {/* Rider Map with Restaurants */}
+            {/* Toggle between maps */}
             {profile?.online && (
+              <div className="mb-4 flex gap-2">
+                <button
+                  onClick={() => setShowRealMap(false)}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
+                    !showRealMap ? "bg-[#1E3F20] text-white" : "bg-white border border-[#E5E1D8] text-[#5C635A]"
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" />
+                  Restaurantes do App
+                </button>
+                <button
+                  onClick={() => setShowRealMap(true)}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
+                    showRealMap ? "bg-[#D97746] text-white" : "bg-white border border-[#E5E1D8] text-[#5C635A]"
+                  }`}
+                >
+                  <Globe className="w-4 h-4" />
+                  Restaurantes Reais (Google)
+                </button>
+              </div>
+            )}
+
+            {/* Google Maps - Real Restaurants */}
+            {profile?.online && showRealMap && (
+              <div className="mb-6">
+                <RealRestaurantsMap 
+                  center={riderPosition}
+                  radius={radiusKm * 1000}
+                />
+              </div>
+            )}
+
+            {/* Leaflet Map - App Restaurants */}
+            {profile?.online && !showRealMap && (
               <div className="mb-6 bg-white rounded-xl border border-[#E5E1D8] overflow-hidden" data-testid="rider-map-section">
                 <div className="px-5 py-3 border-b border-[#E5E1D8] flex items-center justify-between">
                   <div className="flex items-center gap-2">

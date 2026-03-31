@@ -3,6 +3,7 @@ import { useAuth, API } from "../App";
 import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
+import AddressAutocomplete from "./AddressAutocomplete";
 import {
   ShoppingBag, Search, Clock, Star, MapPin, Plus, Minus, ShoppingCart,
   X, ChevronRight, LogOut, Package, ArrowLeft, Check, Utensils,
@@ -51,6 +52,7 @@ export default function CustomerApp() {
   const [activeView, setActiveView] = useState("restaurants");
   const [search, setSearch] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [customerPhone, setCustomerPhone] = useState("");
   const [tip, setTip] = useState(0);
   const [deliveryFeeInfo, setDeliveryFeeInfo] = useState(null);
@@ -127,6 +129,8 @@ export default function CustomerApp() {
         restaurant_id: cart[0].restaurant_id,
         items: cart.map(c => ({ menu_item_id: c.menu_item_id, quantity: c.quantity })),
         delivery_address: deliveryAddress,
+        delivery_lat: deliveryCoords?.lat || null,
+        delivery_lng: deliveryCoords?.lng || null,
         customer_phone: customerPhone || null,
         tip: tip
       });
@@ -442,13 +446,14 @@ export default function CustomerApp() {
 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-[#5C635A] mb-1">Delivery Address</label>
-                  <input
-                    type="text"
+                  <AddressAutocomplete
                     value={deliveryAddress}
-                    onChange={e => setDeliveryAddress(e.target.value)}
-                    placeholder="Your address in Dublin..."
-                    className="w-full px-4 py-3 rounded-xl border border-[#E5E1D8] bg-white focus:border-[#D97746] focus:ring-1 focus:ring-[#D97746] outline-none"
-                    data-testid="delivery-address-input"
+                    onChange={setDeliveryAddress}
+                    placeholder="Digite seu endereço em Dublin..."
+                    onSelect={(place) => {
+                      setDeliveryAddress(place.address);
+                      setDeliveryCoords({ lat: place.lat, lng: place.lng });
+                    }}
                   />
                 </div>
 
