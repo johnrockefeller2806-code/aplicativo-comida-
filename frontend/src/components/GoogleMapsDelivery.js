@@ -65,7 +65,7 @@ const createDeliveryIcon = () => ({
   anchor: { x: 20, y: 20 },
 });
 
-export default function GoogleMapsDelivery({ order, variant = "customer" }) {
+export default function GoogleMapsDelivery({ order, variant = "customer", fullScreen = false }) {
   const { isLoaded, loadError } = useJsApiLoader(GOOGLE_MAPS_CONFIG);
 
   const [directions, setDirections] = useState(null);
@@ -165,7 +165,7 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
 
   if (loadError) {
     return (
-      <div className="h-[300px] bg-[#F3EFE9] rounded-xl flex items-center justify-center">
+      <div className={`${fullScreen ? "h-full" : "h-[300px]"} bg-[#F3EFE9] rounded-xl flex items-center justify-center`}>
         <p className="text-[#5C635A]">Erro ao carregar o mapa</p>
       </div>
     );
@@ -173,17 +173,17 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
 
   if (!isLoaded) {
     return (
-      <div className="h-[300px] bg-[#F3EFE9] rounded-xl flex items-center justify-center animate-pulse">
+      <div className={`${fullScreen ? "h-full" : "h-[300px]"} bg-[#F3EFE9] rounded-xl flex items-center justify-center animate-pulse`}>
         <MapPin className="w-8 h-8 text-[#D5CFC5]" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl overflow-hidden border border-[#E5E1D8]" data-testid="google-maps-delivery">
+    <div className={`${fullScreen ? "h-full flex flex-col" : ""} overflow-hidden ${fullScreen ? "" : "rounded-xl border border-[#E5E1D8]"}`} data-testid="google-maps-delivery">
       {/* ETA Header */}
       {eta && order?.status === "picked_up" && (
-        <div className="bg-[#1E3F20] text-white px-4 py-3 flex items-center justify-between">
+        <div className="bg-[#1E3F20] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#D97746] rounded-full flex items-center justify-center">
               <Bike className="w-5 h-5" />
@@ -204,7 +204,7 @@ export default function GoogleMapsDelivery({ order, variant = "customer" }) {
       )}
 
       {/* Map */}
-      <div style={{ height: "280px" }}>
+      <div style={fullScreen ? { flex: 1 } : { height: "280px" }}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           options={mapOptions}

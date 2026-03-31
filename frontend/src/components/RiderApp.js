@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import SimpleGoogleMap from "./SimpleGoogleMap";
+import GoogleMapsDelivery from "./GoogleMapsDelivery";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
@@ -48,6 +49,7 @@ export default function RiderApp() {
   const [radiusKm, setRadiusKm] = useState(5);
   const [riderPosition, setRiderPosition] = useState({ lat: 53.3498, lng: -6.2603 });
   const prevUnreadRef = useRef(0);
+  const [navigatingOrder, setNavigatingOrder] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -190,15 +192,9 @@ export default function RiderApp() {
     };
   }, [activeOrders]);
 
-  // Open external Google Maps navigation to customer
+  // Show full-screen navigation map to customer
   const navigateToCustomer = (order) => {
-    const lat = order.delivery_lat;
-    const lng = order.delivery_lng;
-    if (lat && lng) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
-    } else if (order.delivery_address) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.delivery_address)}&travelmode=driving`, '_blank');
-    }
+    setNavigatingOrder(order);
   };
 
   const isStudent = profile?.rider_type === "student";
@@ -366,9 +362,58 @@ export default function RiderApp() {
       <main className="flex-1 overflow-hidden">
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
-          <div className="h-full p-4 overflow-auto">
-            {/* Google Maps - Full Screen (only when no active orders and no available orders) */}
-            {profile?.online && activeOrders.length === 0 && available.length === 0 && (
+          <div className="h-full flex flex-col">
+            {/* Navigation Mode - Full Screen Map */}
+            {navigatingOrder && (
+              <div className="h-full flex flex-col" data-testid="navigation-mode">
+                {/* Navigation Header */}
+                <div className="bg-[#1E3F20] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+                  <button
+                    onClick={() => setNavigatingOrder(null)}
+                    className="flex items-center gap-2 px-3 py-2 bg-white/15 hover:bg-white/25 rounded-lg transition-colors"
+                    data-testid="nav-back-btn"
+                  >
+                    <X className="w-4 h-4" />
+                    <span className="text-sm font-medium">Voltar</span>
+                  </button>
+                  <div className="text-center flex-1">
+                    <p className="font-bold text-sm">Navegando para o cliente</p>
+                    <p className="text-xs text-white/70 flex items-center justify-center gap-1">
+                      <MapPin className="w-3 h-3" /> {navigatingOrder.delivery_address}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-[#E5F943]">€{navigatingOrder.rider_amount?.toFixed(2)}</p>
+                  </div>
+                </div>
+                {/* Full Screen Map */}
+                <div className="flex-1">
+                  <GoogleMapsDelivery order={navigatingOrder} variant="rider" fullScreen={true} />
+                </div>
+                {/* Bottom bar with QR */}
+                <div className="bg-white border-t border-[#E5E1D8] px-4 py-3 flex items-center justify-between flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white border border-[#E5E1D8] rounded-lg p-1 shadow-sm">
+                      <QRCodeSVG value={`KANG-DELIVERY:${navigatingOrder.id}`} size={48} level="H" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1A1D1A]">QR para o cliente</p>
+                      <p className="text-[10px] text-[#5C635A]">Mostre ao chegar</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-[#5C635A]">{navigatingOrder.restaurant_name}</p>
+                    <p className="text-sm font-bold text-[#1A1D1A]">{navigatingOrder.items?.length} item(s)</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Normal Deliveries View (when not navigating) */}
+            {!navigatingOrder && (
+              <div className="h-full p-4 overflow-auto">
+                {/* Google Maps - Full Screen (only when no active orders and no available orders) */}
+                {profile?.online && activeOrders.length === 0 && available.length === 0 && (
               <div className="h-full rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
                 <SimpleGoogleMap height="100%" />
               </div>
@@ -480,6 +525,8 @@ export default function RiderApp() {
                   ))}
                 </div>
               </div>
+            )}
+          </div>
             )}
           </div>
         )}
