@@ -83,6 +83,7 @@ export default function RiderApp() {
       // Play sound and show alert if new notifications arrived (only one at a time)
       if (newCount > prevUnreadRef.current && prevUnreadRef.current >= 0) {
         playNotificationSound();
+        fetchData(); // Refresh orders immediately
         const latestUnread = nRes.data.find(n => !n.read);
         if (latestUnread && !newOrderAlert) {
           setNewOrderAlert(latestUnread);
@@ -308,6 +309,25 @@ export default function RiderApp() {
       </nav>
 
       {/* Removed floating notification - orders will show in deliveries tab */}
+
+      {/* New Order Alert Banner - Clickable */}
+      {newOrderAlert && (
+        <button
+          onClick={() => {
+            setActiveTab("deliveries");
+            setNewOrderAlert(null);
+            fetchData();
+          }}
+          className="w-full bg-[#D97746] text-white px-6 py-3 flex items-center justify-between animate-pulse hover:bg-[#C46838] transition-colors flex-shrink-0"
+          data-testid="new-order-alert"
+        >
+          <div className="flex items-center gap-3">
+            <Package className="w-5 h-5" />
+            <span className="font-bold text-sm">Novo pedido disponível!</span>
+          </div>
+          <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">Ver →</span>
+        </button>
+      )}
 
       {/* Student Hours Warning */}
       {isStudent && (
