@@ -406,17 +406,12 @@ export default function RiderApp() {
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="animate-fade-in-up">
-            {/* Deliveroo Style Map - Integrated */}
-            {profile?.online && !showDeliverooMap && (
-              <div className="mb-6 rounded-xl overflow-hidden border border-[#2d2d44] shadow-xl" style={{ height: "450px" }}>
-                <DeliverooStyleMap
-                  riderName={profile?.name || user?.name || "Rider"}
-                  isOnline={profile?.online}
-                  onToggleOnline={toggleOnline}
-                  onChangeArea={(zone) => {
-                    setRiderPosition({ lat: zone.lat, lng: zone.lng });
-                    toast.success(`Área alterada para ${zone.name}`);
-                  }}
+            {/* Google Maps - Clean Style */}
+            {profile?.online && (
+              <div className="mb-6 rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
+                <RealRestaurantsMap 
+                  center={riderPosition}
+                  radius={radiusKm * 1000}
                 />
               </div>
             )}
