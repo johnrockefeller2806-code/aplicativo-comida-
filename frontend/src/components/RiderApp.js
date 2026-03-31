@@ -285,38 +285,36 @@ export default function RiderApp() {
 
       {/* New Order Alert Banner */}
       {newOrderAlert && (
-        <div className="fixed top-0 left-0 right-0 z-[100] animate-fade-in-up" data-testid="new-order-alert">
-          <div className="bg-[#D97746] text-white px-6 py-4 shadow-2xl">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                  <Volume2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="font-heading font-bold text-lg">{newOrderAlert.title}</p>
-                  <p className="text-sm text-white/80">{newOrderAlert.message}</p>
-                  {newOrderAlert.delivery_address && (
-                    <p className="text-xs text-white/60 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3" /> {newOrderAlert.delivery_address}
-                    </p>
-                  )}
-                </div>
+        <div className="fixed top-4 left-4 right-4 z-[100] animate-fade-in-up" data-testid="new-order-alert">
+          <div className="bg-white text-[#1A1D1A] px-5 py-4 shadow-2xl rounded-2xl border border-[#E5E1D8]">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-[#D97746] rounded-full flex items-center justify-center flex-shrink-0">
+                <Volume2 className="w-6 h-6 text-white" />
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setNewOrderAlert(null); setActiveTab("deliveries"); }}
-                  className="px-5 py-2 bg-white text-[#D97746] rounded-full font-bold text-sm hover:bg-white/90 transition-colors active:scale-95"
-                  data-testid="alert-view-btn"
-                >
-                  View Orders
-                </button>
-                <button
-                  onClick={() => setNewOrderAlert(null)}
-                  className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
-                  data-testid="alert-close-btn"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              <div className="flex-1 min-w-0">
+                <p className="font-heading font-bold text-base">{newOrderAlert.title}</p>
+                <p className="text-sm text-[#5C635A]">{newOrderAlert.message}</p>
+                {newOrderAlert.delivery_address && (
+                  <p className="text-xs text-[#5C635A] flex items-center gap-1 mt-1">
+                    <MapPin className="w-3 h-3" /> {newOrderAlert.delivery_address}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => { setNewOrderAlert(null); setActiveTab("deliveries"); }}
+                    className="px-4 py-2 bg-[#D97746] text-white rounded-full font-bold text-sm hover:bg-[#C46838] transition-colors active:scale-95"
+                    data-testid="alert-view-btn"
+                  >
+                    View Orders
+                  </button>
+                  <button
+                    onClick={() => setNewOrderAlert(null)}
+                    className="px-4 py-2 bg-[#F3EFE9] text-[#5C635A] rounded-full font-medium text-sm hover:bg-[#E5E1D8] transition-colors"
+                    data-testid="alert-close-btn"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </div>
           </div>
