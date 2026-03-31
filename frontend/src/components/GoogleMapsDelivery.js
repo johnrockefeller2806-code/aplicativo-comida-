@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from "@react-google-maps/api";
 import { Navigation, MapPin, Clock, Bike } from "lucide-react";
-
-const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+import { GOOGLE_MAPS_CONFIG } from "./googleMapsConfig";
 
 const mapContainerStyle = {
   width: "100%",
@@ -65,10 +64,7 @@ const createDeliveryIcon = () => ({
 });
 
 export default function GoogleMapsDelivery({ order, variant = "customer" }) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
-  });
+  const { isLoaded, loadError } = useJsApiLoader(GOOGLE_MAPS_CONFIG);
 
   const [directions, setDirections] = useState(null);
   const [riderPosition, setRiderPosition] = useState(null);

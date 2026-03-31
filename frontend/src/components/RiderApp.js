@@ -4,42 +4,13 @@ import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import QRScanner from "./QRScanner";
-import RealRestaurantsMap from "./RealRestaurantsMap";
-import DeliverooStyleMap from "./DeliverooStyleMap";
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
-import L from "leaflet";
+import SimpleGoogleMap from "./SimpleGoogleMap";
 import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
   Check, RefreshCw, Zap, AlertTriangle, TrendingUp, Timer,
   Bell, X, Volume2, Heart, Map as MapIcon, QrCode, Globe, Navigation
 } from "lucide-react";
-
-// Custom marker icons
-const riderIcon = new L.DivIcon({
-  html: '<div style="background:#D97746;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:18px;">🏍</div>',
-  className: "",
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
-
-const restaurantIcon = new L.DivIcon({
-  html: '<div style="background:#1E3F20;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:16px;">🍽</div>',
-  className: "",
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-});
-
-function FitBounds({ positions }) {
-  const map = useMap();
-  useEffect(() => {
-    if (positions.length > 0) {
-      const bounds = L.latLngBounds(positions.map(p => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
-    }
-  }, [positions, map]);
-  return null;
-}
 
 // Notification sound using Web Audio API
 function playNotificationSound() {
@@ -406,15 +377,15 @@ export default function RiderApp() {
         {/* Deliveries Tab */}
         {activeTab === "deliveries" && (
           <div className="animate-fade-in-up">
-            {/* Google Maps - Clean Style */}
+            {/* Google Maps - Full Screen */}
             {profile?.online && (
-              <div className="mb-6 rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
-                <RealRestaurantsMap 
-                  center={riderPosition}
-                  radius={radiusKm * 1000}
-                />
+              <div className="mb-4 rounded-xl overflow-hidden border border-[#E5E1D8] shadow-lg">
+                <SimpleGoogleMap height="calc(100vh - 320px)" />
               </div>
             )}
+
+            {/* Available Orders Section */}
+            <h2 className="font-heading font-bold text-xl mb-4">Available Orders</h2>
 
             {/* Active Deliveries with Tracker */}
             {activeOrders.length > 0 && (

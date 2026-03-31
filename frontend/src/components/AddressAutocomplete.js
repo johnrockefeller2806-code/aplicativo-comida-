@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { MapPin, X, Loader2 } from "lucide-react";
-
-const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-const libraries = ["places"];
+import { GOOGLE_MAPS_CONFIG } from "./googleMapsConfig";
 
 export default function AddressAutocomplete({ 
   value, 
@@ -12,10 +10,7 @@ export default function AddressAutocomplete({
   onSelect,
   className = ""
 }) {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries,
-  });
+  const { isLoaded } = useJsApiLoader(GOOGLE_MAPS_CONFIG);
 
   const [inputValue, setInputValue] = useState(value || "");
   const [predictions, setPredictions] = useState([]);

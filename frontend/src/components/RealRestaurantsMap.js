@@ -154,15 +154,15 @@ export default function RealRestaurantsMap({ center, radius = 2000, onSelectRest
   }
 
   return (
-    <div className="rounded-xl overflow-hidden" data-testid="real-restaurants-map">
+    <div className="rounded-xl overflow-hidden" style={{ height: "100%" }} data-testid="real-restaurants-map">
       {/* Map */}
-      <div style={{ height: "400px" }}>
+      <div style={{ height: "100%", minHeight: "500px" }}>
         <GoogleMap
-          mapContainerStyle={mapContainerStyle}
+          mapContainerStyle={{ width: "100%", height: "100%", borderRadius: "12px" }}
           options={mapOptions}
           onLoad={onMapLoad}
           center={riderPosition}
-          zoom={14}
+          zoom={12}
         >
           {/* Rider Position */}
           <Marker
