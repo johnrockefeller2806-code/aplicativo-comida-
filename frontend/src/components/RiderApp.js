@@ -195,7 +195,7 @@ export default function RiderApp() {
   return (
     <div className="h-screen bg-[#FAF9F6] overflow-hidden flex flex-col" data-testid="rider-app">
       {/* Header */}
-      <nav className="bg-[#8B5E3C] text-white px-6 py-4 flex-shrink-0">
+      <nav className="bg-black text-white px-6 py-4 flex-shrink-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bike className="w-6 h-6" />
