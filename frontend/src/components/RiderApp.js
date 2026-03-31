@@ -3,8 +3,8 @@ import { useAuth, API } from "../App";
 import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
-import QRScanner from "./QRScanner";
 import SimpleGoogleMap from "./SimpleGoogleMap";
+import { QRCodeSVG } from "qrcode.react";
 import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
@@ -48,10 +48,6 @@ export default function RiderApp() {
   const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
   const [radiusKm, setRadiusKm] = useState(5);
   const [riderPosition, setRiderPosition] = useState({ lat: 53.3498, lng: -6.2603 });
-  const [showQRScanner, setShowQRScanner] = useState(false);
-  const [qrProcessing, setQrProcessing] = useState(false);
-  const [showRealMap, setShowRealMap] = useState(false);
-  const [showDeliverooMap, setShowDeliverooMap] = useState(false);
   const prevUnreadRef = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -423,14 +419,19 @@ export default function RiderApp() {
                   {activeOrders.map(order => (
                     <div key={order.id} data-testid={`active-delivery-${order.id}`}>
                       <OrderTracker order={order} variant="rider" />
-                      <div className="flex gap-3 mt-3">
-                        <button
-                          onClick={() => setShowQRScanner(true)}
-                          className="flex-1 py-4 bg-[#1E3F20] text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-[#163018] transition-colors active:scale-95"
-                          data-testid={`scan-qr-${order.id}`}
-                        >
-                          <QrCode className="w-5 h-5" /> Escanear QR - EUR {order.rider_amount?.toFixed(2)}
-                        </button>
+                      {/* QR Code for Customer to Scan */}
+                      <div className="mt-4 bg-white rounded-xl border-2 border-[#1E3F20] p-4 text-center">
+                        <p className="font-bold text-sm mb-3">Mostre este QR para o cliente escanear</p>
+                        <div className="bg-white p-3 rounded-lg inline-block shadow-md">
+                          <QRCodeSVG
+                            value={`KANG-DELIVERY:${order.id}`}
+                            size={150}
+                            level="H"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-3">
+                          Cliente escaneia → Confirma entrega → Você recebe €{order.rider_amount?.toFixed(2)}
+                        </p>
                       </div>
                     </div>
                   ))}

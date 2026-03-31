@@ -197,31 +197,6 @@ export default function OrderTracker({ order, variant = "customer" }) {
         </div>
       )}
 
-      {/* QR Code for Customer - when order is being delivered */}
-      {variant === "customer" && order.status === "picked_up" && (
-        <div className="mx-5 mb-4 bg-gradient-to-br from-[#1E3F20] to-[#2D5A30] rounded-xl p-5 text-center" data-testid="qr-code-section">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <QrCode className="w-5 h-5 text-[#E5F943]" />
-            <h4 className="font-bold text-white">Código de Confirmação</h4>
-          </div>
-          <div className="bg-white p-4 rounded-xl inline-block shadow-lg">
-            <QRCodeSVG
-              value={`KANG-DELIVERY:${order.id}`}
-              size={160}
-              level="H"
-              includeMargin={false}
-              data-testid="delivery-qr-code"
-            />
-          </div>
-          <p className="text-white/80 text-sm mt-3">
-            Mostre este QR Code para o entregador confirmar a entrega
-          </p>
-          <p className="text-[#E5F943] text-xs mt-1 font-medium">
-            🔐 O pagamento será liberado automaticamente
-          </p>
-        </div>
-      )}
-
       {/* Order Items */}
       <div className="px-5 pb-4">
         <div className="space-y-1">

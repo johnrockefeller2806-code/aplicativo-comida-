@@ -4,10 +4,11 @@ import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
 import AddressAutocomplete from "./AddressAutocomplete";
+import QRScanner from "./QRScanner";
 import {
   ShoppingBag, Search, Clock, Star, MapPin, Plus, Minus, ShoppingCart,
   X, ChevronRight, LogOut, Package, ArrowLeft, Check, Utensils,
-  Instagram, Phone, Facebook, MessageCircle
+  Instagram, Phone, Facebook, MessageCircle, QrCode
 } from "lucide-react";
 
 const NavBar = ({ cartCount, onCartClick, onOrdersClick, activeView, onBack, onLogout }) => (
@@ -57,6 +58,8 @@ export default function CustomerApp() {
   const [tip, setTip] = useState(0);
   const [deliveryFeeInfo, setDeliveryFeeInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrProcessing, setQrProcessing] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/restaurants`).then(r => { setRestaurants(r.data); setLoading(false); }).catch(() => setLoading(false));
@@ -75,6 +78,22 @@ export default function CustomerApp() {
     setOrders(res.data);
     setActiveView("orders");
   }, []);
+
+  // Handle customer QR scan to confirm delivery
+  const handleQRScan = async (qrData) => {
+    if (qrProcessing) return;
+    setQrProcessing(true);
+    try {
+      const res = await axios.post(`${API}/customer/confirm-delivery`, { qr_data: qrData });
+      toast.success(res.data.message || "Entrega confirmada! Obrigado!");
+      setShowQRScanner(false);
+      loadOrders();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "QR Code inválido");
+    } finally {
+      setQrProcessing(false);
+    }
+  };
 
   // Auto-refresh orders when viewing them
   useEffect(() => {
@@ -500,11 +519,38 @@ export default function CustomerApp() {
             ) : (
               <div className="space-y-6">
                 {orders.map(order => (
-                  <OrderTracker key={order.id} order={order} variant="customer" />
+                  <div key={order.id}>
+                    <OrderTracker order={order} variant="customer" />
+                    {/* Scan QR button when order is being delivered */}
+                    {order.status === "picked_up" && (
+                      <div className="mx-5 mb-4">
+                        <button
+                          onClick={() => setShowQRScanner(true)}
+                          className="w-full py-4 bg-[#1E3F20] text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-[#163018] transition-colors"
+                          data-testid={`scan-qr-btn-${order.id}`}
+                        >
+                          <QrCode className="w-5 h-5" />
+                          Escanear QR do Entregador
+                        </button>
+                        <p className="text-center text-xs text-gray-500 mt-2">
+                          Escaneie o QR Code do entregador para confirmar que recebeu a comida
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
           </div>
+        )}
+
+        {/* QR Scanner Modal */}
+        {showQRScanner && (
+          <QRScanner
+            onScan={handleQRScan}
+            onClose={() => setShowQRScanner(false)}
+            isProcessing={qrProcessing}
+          />
         )}
       </main>
     </div>
