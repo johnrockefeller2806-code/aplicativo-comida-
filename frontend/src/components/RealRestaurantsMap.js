@@ -172,19 +172,6 @@ export default function RealRestaurantsMap({ center, radius = 2000, onSelectRest
             zIndex={1000}
           />
 
-          {/* Search Radius */}
-          <Circle
-            center={riderPosition}
-            radius={radius}
-            options={{
-              strokeColor: "#D97746",
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: "#D97746",
-              fillOpacity: 0.1,
-            }}
-          />
-
           {/* Restaurant Markers */}
           {restaurants.map((place) => (
             <Marker
