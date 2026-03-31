@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
-const DeliveryMap = lazy(() => import("./DeliveryMap"));
+const GoogleMapsDelivery = lazy(() => import("./GoogleMapsDelivery"));
 
 const STEPS = [
   { key: "pending", label: "Order Placed", icon: ShoppingBag },
@@ -192,7 +192,7 @@ export default function OrderTracker({ order, variant = "customer" }) {
       {(order.status === "picked_up") && (
         <div className="mx-5 mb-4">
           <Suspense fallback={<div className="h-[280px] bg-[#F3EFE9] rounded-xl animate-pulse flex items-center justify-center"><MapPin className="w-8 h-8 text-[#D5CFC5]" /></div>}>
-            <DeliveryMap order={order} variant={variant} />
+            <GoogleMapsDelivery order={order} variant={variant} />
           </Suspense>
         </div>
       )}
