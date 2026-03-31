@@ -3,13 +3,14 @@ import { useAuth, API } from "../App";
 import axios from "axios";
 import { toast } from "sonner";
 import OrderTracker from "./OrderTracker";
+import QRScanner from "./QRScanner";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   Bike, Power, Package, DollarSign, Clock, LogOut, MapPin,
   Check, RefreshCw, Zap, AlertTriangle, TrendingUp, Timer,
-  Bell, X, Volume2, Heart, Map as MapIcon
+  Bell, X, Volume2, Heart, Map as MapIcon, QrCode
 } from "lucide-react";
 
 // Custom marker icons
@@ -74,6 +75,8 @@ export default function RiderApp() {
   const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
   const [radiusKm, setRadiusKm] = useState(5);
   const [riderPosition, setRiderPosition] = useState({ lat: 53.3498, lng: -6.2603 });
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrProcessing, setQrProcessing] = useState(false);
   const prevUnreadRef = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -177,6 +180,21 @@ export default function RiderApp() {
       fetchData();
     } catch (err) {
       toast.error("Error completing delivery");
+    }
+  };
+
+  const handleQRScan = async (qrData) => {
+    if (qrProcessing) return;
+    setQrProcessing(true);
+    try {
+      const res = await axios.post(`${API}/rider/validate-qr`, { qr_data: qrData });
+      toast.success(res.data.message);
+      setShowQRScanner(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "QR Code inválido");
+    } finally {
+      setQrProcessing(false);
     }
   };
 
@@ -476,13 +494,15 @@ export default function RiderApp() {
                   {activeOrders.map(order => (
                     <div key={order.id} data-testid={`active-delivery-${order.id}`}>
                       <OrderTracker order={order} variant="rider" />
-                      <button
-                        onClick={() => completeDelivery(order.id)}
-                        className="w-full mt-3 py-4 bg-green-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-green-700 transition-colors active:scale-95"
-                        data-testid={`complete-delivery-${order.id}`}
-                      >
-                        <Check className="w-5 h-5" /> Complete Delivery - Get EUR {order.rider_amount?.toFixed(2)}
-                      </button>
+                      <div className="flex gap-3 mt-3">
+                        <button
+                          onClick={() => setShowQRScanner(true)}
+                          className="flex-1 py-4 bg-[#1E3F20] text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-[#163018] transition-colors active:scale-95"
+                          data-testid={`scan-qr-${order.id}`}
+                        >
+                          <QrCode className="w-5 h-5" /> Escanear QR - EUR {order.rider_amount?.toFixed(2)}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -689,6 +709,15 @@ export default function RiderApp() {
           </div>
         )}
       </main>
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowQRScanner(false)}
+          isProcessing={qrProcessing}
+        />
+      )}
     </div>
   );
 }

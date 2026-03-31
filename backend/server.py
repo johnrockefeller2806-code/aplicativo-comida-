@@ -605,6 +605,78 @@ async def accept_order(order_id: str, user: dict = Depends(get_current_user)):
     )
     return {"message": "Order accepted", "order_id": order_id}
 
+@api_router.get("/orders/{order_id}/qr-code")
+async def get_order_qr_code(order_id: str, user: dict = Depends(get_current_user)):
+    """Get QR code data for order delivery confirmation"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only show QR when order is picked up (being delivered)
+    if order.get("status") != "picked_up":
+        raise HTTPException(status_code=400, detail="QR code only available when order is being delivered")
+    
+    # Generate QR data with order verification
+    qr_data = f"KANG-DELIVERY:{order_id}"
+    return {"qr_data": qr_data, "order_id": order_id}
+
+class QRValidation(BaseModel):
+    qr_data: str
+
+@api_router.post("/rider/validate-qr")
+async def validate_qr_and_complete(data: QRValidation, user: dict = Depends(get_current_user)):
+    """Rider scans QR code to complete delivery and release payment"""
+    profile = await db.rider_profiles.find_one({"user_id": user["id"]}, {"_id": 0})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Rider profile not found")
+    
+    # Parse QR data
+    if not data.qr_data.startswith("KANG-DELIVERY:"):
+        raise HTTPException(status_code=400, detail="Invalid QR code")
+    
+    order_id = data.qr_data.replace("KANG-DELIVERY:", "")
+    
+    order = await db.orders.find_one({"id": order_id, "rider_id": profile["id"]}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found or not assigned to you")
+    
+    if order.get("status") != "picked_up":
+        raise HTTPException(status_code=400, detail="Order is not in delivery status")
+    
+    # Complete delivery and release payment
+    rider_earnings = order.get("rider_amount", MIN_DELIVERY_FEE)
+    new_total = round(profile.get("total_earnings", 0) + rider_earnings, 2)
+    new_deliveries = profile.get("total_deliveries", 0) + 1
+
+    now_complete = datetime.now(timezone.utc).isoformat()
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": "delivered", "delivered_at": now_complete, "updated_at": now_complete}}
+    )
+    await db.rider_profiles.update_one(
+        {"id": profile["id"]},
+        {"$set": {"total_earnings": new_total, "total_deliveries": new_deliveries}}
+    )
+    await db.payments.insert_one({
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "total_amount": order["total"],
+        "restaurant_amount": order.get("restaurant_amount", 0),
+        "rider_amount": rider_earnings,
+        "platform_amount": order.get("platform_amount", 0),
+        "rider_id": profile["id"],
+        "status": "completed",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+    return {
+        "success": True,
+        "message": f"Delivery confirmed! Payment released: EUR {rider_earnings:.2f}",
+        "earnings": rider_earnings,
+        "total_earnings": new_total,
+        "order_id": order_id
+    }
+
 @api_router.post("/rider/complete/{order_id}")
 async def complete_delivery(order_id: str, user: dict = Depends(get_current_user)):
     profile = await db.rider_profiles.find_one({"user_id": user["id"]}, {"_id": 0})

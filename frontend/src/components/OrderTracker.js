@@ -1,7 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
-  Clock, ShoppingBag, ChefHat, Check, Bike, Package, MapPin, Zap
+  Clock, ShoppingBag, ChefHat, Check, Bike, Package, MapPin, Zap, QrCode
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 const DeliveryMap = lazy(() => import("./DeliveryMap"));
 
@@ -193,6 +194,31 @@ export default function OrderTracker({ order, variant = "customer" }) {
           <Suspense fallback={<div className="h-[280px] bg-[#F3EFE9] rounded-xl animate-pulse flex items-center justify-center"><MapPin className="w-8 h-8 text-[#D5CFC5]" /></div>}>
             <DeliveryMap order={order} variant={variant} />
           </Suspense>
+        </div>
+      )}
+
+      {/* QR Code for Customer - when order is being delivered */}
+      {variant === "customer" && order.status === "picked_up" && (
+        <div className="mx-5 mb-4 bg-gradient-to-br from-[#1E3F20] to-[#2D5A30] rounded-xl p-5 text-center" data-testid="qr-code-section">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <QrCode className="w-5 h-5 text-[#E5F943]" />
+            <h4 className="font-bold text-white">Código de Confirmação</h4>
+          </div>
+          <div className="bg-white p-4 rounded-xl inline-block shadow-lg">
+            <QRCodeSVG
+              value={`KANG-DELIVERY:${order.id}`}
+              size={160}
+              level="H"
+              includeMargin={false}
+              data-testid="delivery-qr-code"
+            />
+          </div>
+          <p className="text-white/80 text-sm mt-3">
+            Mostre este QR Code para o entregador confirmar a entrega
+          </p>
+          <p className="text-[#E5F943] text-xs mt-1 font-medium">
+            🔐 O pagamento será liberado automaticamente
+          </p>
         </div>
       )}
 
