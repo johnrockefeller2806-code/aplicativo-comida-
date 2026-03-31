@@ -386,7 +386,7 @@ export default function RiderApp() {
 
             {/* Offline State */}
             {!profile?.online && (
-              <div className="text-center py-16">
+              <div className="text-center py-16 flex flex-col items-center justify-center h-full">
                 <Power className="w-16 h-16 text-[#D5CFC5] mx-auto mb-4" />
                 <p className="text-[#5C635A] text-lg mb-4">You're offline</p>
                 <button
@@ -396,6 +396,12 @@ export default function RiderApp() {
                 >
                   Go Online
                 </button>
+                {/* Logo */}
+                <img 
+                  src="/logo.png" 
+                  alt="Kangaroos" 
+                  className="mt-12 w-32 h-32 object-contain opacity-70"
+                />
               </div>
             )}
 
