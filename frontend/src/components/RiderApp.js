@@ -283,36 +283,82 @@ export default function RiderApp() {
         </div>
       </nav>
 
-      {/* New Order Alert Banner - Single notification centered */}
+      {/* New Order Alert Banner - Centered */}
       {newOrderAlert && (
         <div 
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] w-[90%] max-w-sm"
+          style={{
+            position: 'fixed',
+            top: '16px',
+            left: '0',
+            right: '0',
+            display: 'flex',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '0 16px'
+          }}
           data-testid="new-order-alert"
         >
-          <div className="bg-white text-[#1A1D1A] p-4 shadow-2xl rounded-2xl border-2 border-[#D97746]">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-[#D97746] rounded-full flex items-center justify-center flex-shrink-0">
-                <Volume2 className="w-5 h-5 text-white" />
+          <div style={{
+            backgroundColor: 'white',
+            padding: '16px',
+            borderRadius: '16px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+            border: '2px solid #D97746',
+            width: '100%',
+            maxWidth: '350px'
+          }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                backgroundColor: '#D97746',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <Volume2 style={{ width: '20px', height: '20px', color: 'white' }} />
               </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm">{newOrderAlert.title}</p>
-                <p className="text-xs text-[#5C635A] mt-0.5">{newOrderAlert.message}</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 'bold', fontSize: '14px', margin: 0 }}>{newOrderAlert.title}</p>
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{newOrderAlert.message}</p>
                 {newOrderAlert.delivery_address && (
-                  <p className="text-xs text-[#5C635A] flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3" /> 
+                  <p style={{ fontSize: '11px', color: '#666', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <MapPin style={{ width: '12px', height: '12px' }} /> 
                     {newOrderAlert.delivery_address}
                   </p>
                 )}
-                <div className="flex gap-2 mt-3">
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                   <button
                     onClick={() => { setNewOrderAlert(null); setActiveTab("deliveries"); }}
-                    className="flex-1 py-2 bg-[#D97746] text-white rounded-full font-bold text-xs"
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      backgroundColor: '#D97746',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontWeight: 'bold',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
                   >
                     View
                   </button>
                   <button
                     onClick={() => setNewOrderAlert(null)}
-                    className="flex-1 py-2 bg-gray-200 text-gray-600 rounded-full font-medium text-xs"
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      backgroundColor: '#eee',
+                      color: '#666',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontWeight: '500',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
                   >
                     Dismiss
                   </button>
